@@ -52,10 +52,14 @@
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported define -----------------------------------------------------------*/
+#include "device.h"
+#if !defined(FLASH_DISK_START_ADDRESS) && !defined(FLASH_DISK_SIZE) && !defined(FLASH_PAGE_SIZE)
+	#error Define FLASH_DISK_START_ADDRESS, FLASH_DISK_SIZE, FLASH_PAGE_SIZE
+#endif
+
 #define MASS_MEMORY_START     0x04002000
 #define BULK_MAX_PACKET_SIZE  0x00000040
-#define LED_ON                0xF0
-#define LED_OFF               0xFF
+#define WAIT_TIMEOUT 100000
 
 #define         ID1          (0x1FFFF7E8)
 #define         ID2          (0x1FFFF7EC)
@@ -71,9 +75,8 @@ void Set_USBClock(void);
 void Enter_LowPowerMode(void);
 void Leave_LowPowerMode(void);
 void USB_Interrupts_Config(FunctionalState state);
-void USB_Cable_Config(FunctionalState NewState);
+void USB_Cable_Config (FunctionalState NewState);
 void Get_SerialNum(void);
-void LCD_Control(void);
 uint32_t CDC_Send_DATA(uint8_t *ptrBuffer, uint8_t Send_length);
 uint32_t CDC_Receive_DATA(void);
 /* External variables --------------------------------------------------------*/

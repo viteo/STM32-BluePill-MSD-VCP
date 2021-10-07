@@ -168,6 +168,19 @@ void SysTick_Handler(void)
 }
 
 /*******************************************************************************
+* Function Name  : USB_HP_CAN1_TX_IRQHandler
+* Description    : This function handles USB High Priority or CAN TX interrupts requests
+*                  requests.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USB_HP_CAN_TX_IRQHandler(void)
+{
+  CTR_HP();
+}
+
+/*******************************************************************************
 * Function Name  : USB_IRQHandler
 * Description    : This function handles USB Low Priority interrupts
 *                  requests.
@@ -175,11 +188,7 @@ void SysTick_Handler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-#if defined(STM32L1XX_MD) || defined(STM32L1XX_HD)|| defined(STM32L1XX_MD_PLUS)|| defined (STM32F37X)
-void USB_LP_IRQHandler(void)
-#else
 void USB_LP_CAN_RX0_IRQHandler(void)
-#endif
 {
   USB_Istr();
 }
@@ -191,12 +200,7 @@ void USB_LP_CAN_RX0_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-
-#if defined(STM32L1XX_MD) || defined(STM32L1XX_HD)|| defined(STM32L1XX_MD_PLUS)
-void USB_FS_WKUP_IRQHandler(void)
-#else
 void USBWakeUp_IRQHandler(void)
-#endif
 {
   EXTI_ClearITPendingBit(EXTI_Line18);
 }

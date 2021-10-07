@@ -4,7 +4,7 @@
   * @author  MCD Application Team
   * @version V4.1.0
   * @date    26-May-2017
-  * @brief   Descriptors for Virtual Com Port Demo
+  * @brief   Descriptors for Custom Composite device MSC+CDC
   ******************************************************************************
   * @attention
   *
@@ -41,45 +41,83 @@
 #include "usb_desc.h"
 
 /* USB Standard Device Descriptor */
-const uint8_t Virtual_Com_Port_DeviceDescriptor[] =
-  {
-    0x12,   /* bLength */
-    USB_DEVICE_DESCRIPTOR_TYPE,     /* bDescriptorType */
-    0x00,
-    0x02,   /* bcdUSB = 2.00 */
-    0x02,   /* bDeviceClass: CDC */
-    0x02,   /* bDeviceSubClass */
-    0x02,   /* bDeviceProtocol */
-    0x40,   /* bMaxPacketSize0 */
-    0x83,
-    0x04,   /* idVendor = 0x0483 */
-    0x40,
-    0x57,   /* idProduct = 0x7540 */
-    0x00,
-    0x02,   /* bcdDevice = 2.00 */
-    1,              /* Index of string descriptor describing manufacturer */
-    2,              /* Index of string descriptor describing product */
-    3,              /* Index of string descriptor describing the device's serial number */
-    0x01    /* bNumConfigurations */
-  };
+const uint8_t Composite_DeviceDescriptor[Composite_SIZ_DEVICE_DESC] =
+{
+		0x12,                       /*bLength */
+		USB_DEVICE_DESCRIPTOR_TYPE, /*bDescriptorType*/
+		0x00,
+		0x02,   /* bcdUSB = 2.00 */
+		0xEF,                       /*bDeviceClass (Miscellaneous)*/
+		0x02,                       /*bDeviceSubClass*/
+		0x01,                       /*bDeviceProtocol*/
+		0x40,   /* bMaxPacketSize */
+		0x83,
+		0x04,   /* idVendor = 0x0483 */
+		0x41,
+		0x57,   /* idProduct = 0x7541 */
+		0x00,
+		0x02,   /* bcdDevice = 2.00 */
+		1,              /* Index of string descriptor describing manufacturer */
+		2,              /* Index of string descriptor describing product */
+		3,              /* Index of string descriptor describing the device's serial number */
+		0x01    /* bNumConfigurations */
+}; /* Composite_DeviceDescriptor */
 
-const uint8_t Virtual_Com_Port_ConfigDescriptor[] =
-  {
-    /*Configuration Descriptor*/
-    0x09,   /* bLength: Configuration Descriptor size */
-    USB_CONFIGURATION_DESCRIPTOR_TYPE,      /* bDescriptorType: Configuration */
-    VIRTUAL_COM_PORT_SIZ_CONFIG_DESC,       /* wTotalLength:no of returned bytes */
+
+/* USB MSC+CDC Configuration Descriptor */
+const uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
+{
+    0x09, /* bLength: Configuration Descriptor size */
+    USB_CONFIGURATION_DESCRIPTOR_TYPE, /* bDescriptorType: Configuration */
+    Composite_SIZ_CONFIG_DESC,    /* wTotalLength: Bytes returned */
     0x00,
-    0x02,   /* bNumInterfaces: 2 interface */
-    0x01,   /* bConfigurationValue: Configuration value */
-    0x00,   /* iConfiguration: Index of string descriptor describing the configuration */
-    0xC0,   /* bmAttributes: self powered */
-    0x32,   /* MaxPower 0 mA */
+    0x03,         /* bNumInterfaces: 3 interfaces */
+    0x01,         /* bConfigurationValue: Configuration value */
+    0x02,         /* iConfiguration: Index of string descriptor describing the configuration*/
+    0xC0,         /* bmAttributes: bus powered and Supports Remote Wakeup */
+    0x32,         /* MaxPower 100 mA: this current is used for detecting Vbus */
+
+    /************** Descriptor of Mass Storage interface ****************/
+    0x09,         /* bLength: Interface Descriptor size */
+    USB_INTERFACE_DESCRIPTOR_TYPE,/* bDescriptorType: Interface descriptor type */
+	MSC_INTERFACE_IDX,         /* bInterfaceNumber: Number of Interface */
+    0x00,         /* bAlternateSetting: Alternate setting */
+    0x02,         /* bNumEndpoints */
+    0x08,         /* bInterfaceClass: MASS STORAGE Class */
+    0x06,         /* bInterfaceSubClass : SCSI transparent*/
+    0x50,         /* nInterfaceProtocol */
+    0x05,            /* iInterface: */
+    /******************** Mass Storage Endpoints ********************/
+    0x07,   /*Endpoint descriptor length = 7*/
+    0x05,   /*Endpoint descriptor type */
+	MSC_IN_EP,   /*Endpoint address (IN1) */
+    0x02,   /*Bulk endpoint type */
+    0x40,   /*Maximum packet size (64 bytes) */
+    0x00,
+    0x00,   /*Polling interval in milliseconds */
+
+    0x07,   /*Endpoint descriptor length = 7 */
+    0x05,   /*Endpoint descriptor type */
+	MSC_OUT_EP,   /*Endpoint address (OUT1) */
+    0x02,   /*Bulk endpoint type */
+    0x40,   /*Maximum packet size (64 bytes) */
+    0x00,
+    0x00,   /*Polling interval in milliseconds*/
+    /******************** Interface association descriptor (IAD) ******************/
+	0x08,   /* bLength */
+	0x0B,   /* bDescriptorType */
+	CDC_INTERFACE_IDX, /* bFirstInterface */
+	0x02,   /* bInterfaceCount */
+	0x02,   /* bFunctionClass */
+	0x02,   /* bFunctionSubClass */
+	0x01,   /* bFunctionProtocol */
+	0x00,   /* iFunction (Index of string descriptor describing this function) */
+	/********************  CDC interfaces ********************/
     /*Interface Descriptor*/
     0x09,   /* bLength: Interface Descriptor size */
     USB_INTERFACE_DESCRIPTOR_TYPE,  /* bDescriptorType: Interface */
     /* Interface descriptor type */
-    0x00,   /* bInterfaceNumber: Number of Interface */
+	CDC_INTERFACE_IDX,   /* bInterfaceNumber: Number of Interface */
     0x00,   /* bAlternateSetting: Alternate setting */
     0x01,   /* bNumEndpoints: One endpoints used */
     0x02,   /* bInterfaceClass: Communication Interface Class */
@@ -92,93 +130,94 @@ const uint8_t Virtual_Com_Port_ConfigDescriptor[] =
     0x00,   /* bDescriptorSubtype: Header Func Desc */
     0x10,   /* bcdCDC: spec release number */
     0x01,
-    /*Call Management Functional Descriptor*/
-    0x05,   /* bFunctionLength */
-    0x24,   /* bDescriptorType: CS_INTERFACE */
-    0x01,   /* bDescriptorSubtype: Call Management Func Desc */
-    0x00,   /* bmCapabilities: D0+D1 */
-    0x01,   /* bDataInterface: 1 */
-    /*ACM Functional Descriptor*/
-    0x04,   /* bFunctionLength */
-    0x24,   /* bDescriptorType: CS_INTERFACE */
-    0x02,   /* bDescriptorSubtype: Abstract Control Management desc */
-    0x02,   /* bmCapabilities */
-    /*Union Functional Descriptor*/
-    0x05,   /* bFunctionLength */
-    0x24,   /* bDescriptorType: CS_INTERFACE */
-    0x06,   /* bDescriptorSubtype: Union func desc */
-    0x00,   /* bMasterInterface: Communication class interface */
-    0x01,   /* bSlaveInterface0: Data Class Interface */
-    /*Endpoint 2 Descriptor*/
-    0x07,   /* bLength: Endpoint Descriptor size */
-    USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
-    0x82,   /* bEndpointAddress: (IN2) */
-    0x03,   /* bmAttributes: Interrupt */
-    VIRTUAL_COM_PORT_INT_SIZE,      /* wMaxPacketSize: */
-    0x00,
-    0xFF,   /* bInterval: */
-    /*Data class interface descriptor*/
-    0x09,   /* bLength: Endpoint Descriptor size */
-    USB_INTERFACE_DESCRIPTOR_TYPE,  /* bDescriptorType: */
-    0x01,   /* bInterfaceNumber: Number of Interface */
-    0x00,   /* bAlternateSetting: Alternate setting */
-    0x02,   /* bNumEndpoints: Two endpoints used */
-    0x0A,   /* bInterfaceClass: CDC */
-    0x00,   /* bInterfaceSubClass: */
-    0x00,   /* bInterfaceProtocol: */
-    0x00,   /* iInterface: */
-    /*Endpoint 3 Descriptor*/
-    0x07,   /* bLength: Endpoint Descriptor size */
-    USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
-    0x03,   /* bEndpointAddress: (OUT3) */
-    0x02,   /* bmAttributes: Bulk */
-    VIRTUAL_COM_PORT_DATA_SIZE,             /* wMaxPacketSize: */
-    0x00,
-    0x00,   /* bInterval: ignore for Bulk transfer */
-    /*Endpoint 1 Descriptor*/
-    0x07,   /* bLength: Endpoint Descriptor size */
-    USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
-    0x81,   /* bEndpointAddress: (IN1) */
-    0x02,   /* bmAttributes: Bulk */
-    VIRTUAL_COM_PORT_DATA_SIZE,             /* wMaxPacketSize: */
-    0x00,
-    0x00    /* bInterval */
-  };
+	/*Call Management Functional Descriptor*/
+	0x05,   /* bFunctionLength */
+	0x24,   /* bDescriptorType: CS_INTERFACE */
+	0x01,   /* bDescriptorSubtype: Call Management Func Desc */
+	0x00,   /* bmCapabilities: D0+D1 */
+	CDC_INTERFACE_IDX + 1,   /* bDataInterface: 2 */
+	/*ACM Functional Descriptor*/
+	0x04,   /* bFunctionLength */
+	0x24,   /* bDescriptorType: CS_INTERFACE */
+	0x02,   /* bDescriptorSubtype: Abstract Control Management desc */
+	0x02,   /* bmCapabilities */
 
-/* USB String Descriptors */
-const uint8_t Virtual_Com_Port_StringLangID[VIRTUAL_COM_PORT_SIZ_STRING_LANGID] =
-  {
-    VIRTUAL_COM_PORT_SIZ_STRING_LANGID,
-    USB_STRING_DESCRIPTOR_TYPE,
-    0x09,
-    0x04 /* LangID = 0x0409: U.S. English */
-  };
+	/*Union Functional Descriptor*/
+	0x05,   /* bFunctionLength */
+	0x24,   /* bDescriptorType: CS_INTERFACE */
+	0x06,   /* bDescriptorSubtype: Union func desc */
+	CDC_INTERFACE_IDX,   /* bMasterInterface: Communication class interface */
+	CDC_INTERFACE_IDX + 1,   /* bSlaveInterface0: Data Class Interface */
+	/*Endpoint 2 Descriptor*/
+	0x07,   /* bLength: Endpoint Descriptor size */
+	USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
+	CDC_CMD_EP,   /* bEndpointAddress: (IN2) */
+	0x03,   /* bmAttributes: Interrupt */
+	0x08,      /* wMaxPacketSize: */
+	0x00,
+	0x10,   /* bInterval: */
+	/*Data class interface descriptor*/
+	0x09,   /* bLength: Endpoint Descriptor size */
+	USB_INTERFACE_DESCRIPTOR_TYPE,  /* bDescriptorType: */
+	CDC_INTERFACE_IDX + 1,   /* bInterfaceNumber: Number of Interface */
+	0x00,   /* bAlternateSetting: Alternate setting */
+	0x02,   /* bNumEndpoints: Two endpoints used */
+	0x0A,   /* bInterfaceClass: CDC */
+	0x00,   /* bInterfaceSubClass: */
+	0x00,   /* bInterfaceProtocol: */
+	0x00,   /* iInterface: */
+	/*Endpoint OUT Descriptor*/
+	0x07,   /* bLength: Endpoint Descriptor size */
+	USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
+	CDC_OUT_EP,   /* bEndpointAddress (OUT3)*/
+	0x02,   /* bmAttributes: Bulk */
+	0x40,   /* wMaxPacketSize: */
+	0x00,
+	0x00,   /* bInterval: ignore for Bulk transfer */
+	/*Endpoint IN Descriptor*/
+	0x07,   /* bLength: Endpoint Descriptor size */
+	USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
+	CDC_IN_EP,   /* bEndpointAddress: (IN3) */
+	0x02,   /* bmAttributes: Bulk */
+	0x40,             /* wMaxPacketSize: */
+	0x00,
+	0x00    /* bInterval */
+}; /* Composite_ConfigDescriptor */
 
-const uint8_t Virtual_Com_Port_StringVendor[VIRTUAL_COM_PORT_SIZ_STRING_VENDOR] =
-  {
-    VIRTUAL_COM_PORT_SIZ_STRING_VENDOR,     /* Size of Vendor string */
-    USB_STRING_DESCRIPTOR_TYPE,             /* bDescriptorType*/
-    /* Manufacturer: "STMicroelectronics" */
-    'S', 0, 'T', 0, 'M', 0, 'i', 0, 'c', 0, 'r', 0, 'o', 0, 'e', 0,
-    'l', 0, 'e', 0, 'c', 0, 't', 0, 'r', 0, 'o', 0, 'n', 0, 'i', 0,
-    'c', 0, 's', 0
-  };
+/* USB String Descriptors (optional) */
+const uint8_t Composite_StringLangID[Composite_SIZ_STRING_LANGID] =
+{
+		Composite_SIZ_STRING_LANGID,
+		USB_STRING_DESCRIPTOR_TYPE,
+		0x09,
+		0x04
+}; /* LangID = 0x0409: U.S. English */
 
-const uint8_t Virtual_Com_Port_StringProduct[VIRTUAL_COM_PORT_SIZ_STRING_PRODUCT] =
-  {
-    VIRTUAL_COM_PORT_SIZ_STRING_PRODUCT,          /* bLength */
-    USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
-    /* Product name: "STM32 Virtual COM Port" */
-    'S', 0, 'T', 0, 'M', 0, '3', 0, '2', 0, ' ', 0, 'V', 0, 'i', 0,
-    'r', 0, 't', 0, 'u', 0, 'a', 0, 'l', 0, ' ', 0, 'C', 0, 'O', 0,
-    'M', 0, ' ', 0, 'P', 0, 'o', 0, 'r', 0, 't', 0, ' ', 0, ' ', 0
-  };
+const uint8_t Composite_StringVendor[Composite_SIZ_STRING_VENDOR] =
+{
+		Composite_SIZ_STRING_VENDOR, /* Size of Vendor string */
+		USB_STRING_DESCRIPTOR_TYPE,  /* bDescriptorType*/
+		/* Manufacturer: "STMicroelectronics" */
+		'S', 0, 'T', 0, 'M', 0, 'i', 0, 'c', 0, 'r', 0, 'o', 0, 'e', 0,
+		'l', 0, 'e', 0, 'c', 0, 't', 0, 'r', 0, 'o', 0, 'n', 0, 'i', 0,
+		'c', 0, 's', 0
+};
 
-uint8_t Virtual_Com_Port_StringSerial[VIRTUAL_COM_PORT_SIZ_STRING_SERIAL] =
-  {
-    VIRTUAL_COM_PORT_SIZ_STRING_SERIAL,           /* bLength */
-    USB_STRING_DESCRIPTOR_TYPE,                   /* bDescriptorType */
-    'S', 0, 'T', 0, 'M', 0, '3', 0, '2', 0
-  };
+const uint8_t Composite_StringProduct[Composite_SIZ_STRING_PRODUCT] =
+{
+		Composite_SIZ_STRING_PRODUCT,          /* bLength */
+		USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
+		'S', 0, 'T', 0, 'M', 0, '3', 0, '2', 0, ' ', 0,
+		'C', 0, 'o', 0, 'm', 0, 'p', 0, 'o', 0, 's', 0, 'i', 0, 't', 0, 'e', 0,	' ', 0,
+		'M', 0, 'S', 0, 'C', 0, '+', 0, 'C', 0, 'D', 0, 'C', 0
+};
+
+uint8_t Composite_StringSerial[Composite_SIZ_STRING_SERIAL] =
+{
+		Composite_SIZ_STRING_SERIAL,           /* bLength */
+		USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
+		'S', 0, 'T', 0, 'M', 0,'3', 0,'2', 0
+};
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+

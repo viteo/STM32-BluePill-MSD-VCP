@@ -4,7 +4,7 @@
   * @author  MCD Application Team
   * @version V4.1.0
   * @date    26-May-2017
-  * @brief   All processing related to Virtual COM Port Demo (Endpoint 0)
+  * @brief   All processing related to Custom HID demo
   ******************************************************************************
   * @attention
   *
@@ -37,8 +37,8 @@
 
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __usb_prop_H
-#define __usb_prop_H
+#ifndef __USB_PROP_H
+#define __USB_PROP_H
 
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
@@ -52,17 +52,11 @@ typedef struct
 
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
-/* Exported define -----------------------------------------------------------*/
 
-#define Virtual_Com_Port_GetConfiguration          NOP_Process
-//#define Virtual_Com_Port_SetConfiguration          NOP_Process
-#define Virtual_Com_Port_GetInterface              NOP_Process
-#define Virtual_Com_Port_SetInterface              NOP_Process
-#define Virtual_Com_Port_GetStatus                 NOP_Process
-#define Virtual_Com_Port_ClearFeature              NOP_Process
-#define Virtual_Com_Port_SetEndPointFeature        NOP_Process
-#define Virtual_Com_Port_SetDeviceFeature          NOP_Process
-//#define Virtual_Com_Port_SetDeviceAddress          NOP_Process
+/* MASS Storage Requests*/
+#define GET_MAX_LUN                0xFE
+#define MASS_STORAGE_RESET         0xFF
+#define LUN_DATA_LENGTH            1
 
 #define SEND_ENCAPSULATED_COMMAND   0x00
 #define GET_ENCAPSULATED_RESPONSE   0x01
@@ -74,24 +68,34 @@ typedef struct
 #define SET_CONTROL_LINE_STATE      0x22
 #define SEND_BREAK                  0x23
 
+/* Exported define -----------------------------------------------------------*/
+#define Composite_GetConfiguration          NOP_Process
+//#define Composite_SetConfiguration          NOP_Process
+#define Composite_GetInterface              NOP_Process
+#define Composite_SetInterface              NOP_Process
+#define Composite_GetStatus                 NOP_Process
+//#define Composite_ClearFeature              NOP_Process
+#define Composite_SetEndPointFeature        NOP_Process
+#define Composite_SetDeviceFeature          NOP_Process
+//#define Composite_SetDeviceAddress          NOP_Process
+
 /* Exported functions ------------------------------------------------------- */
-void Virtual_Com_Port_init(void);
-void Virtual_Com_Port_Reset(void);
-void Virtual_Com_Port_SetConfiguration(void);
-void Virtual_Com_Port_SetDeviceAddress (void);
-void Virtual_Com_Port_Status_In (void);
-void Virtual_Com_Port_Status_Out (void);
-RESULT Virtual_Com_Port_Data_Setup(uint8_t);
-RESULT Virtual_Com_Port_NoData_Setup(uint8_t);
-RESULT Virtual_Com_Port_Get_Interface_Setting(uint8_t Interface, uint8_t AlternateSetting);
-uint8_t *Virtual_Com_Port_GetDeviceDescriptor(uint16_t );
-uint8_t *Virtual_Com_Port_GetConfigDescriptor(uint16_t);
-uint8_t *Virtual_Com_Port_GetStringDescriptor(uint16_t);
+void Composite_Init(void);
+void Composite_Reset(void);
+void Composite_SetConfiguration(void);
+void Composite_SetDeviceAddress (void);
+void Composite_Status_In (void);
+void Composite_Status_Out (void);
+RESULT Composite_Data_Setup(uint8_t);
+RESULT Composite_NoData_Setup(uint8_t);
+RESULT Composite_Get_Interface_Setting(uint8_t Interface, uint8_t AlternateSetting);
+uint8_t *Composite_GetDeviceDescriptor(uint16_t );
+uint8_t *Composite_GetConfigDescriptor(uint16_t);
+uint8_t *Composite_GetStringDescriptor(uint16_t);
+void Composite_ClearFeature(void);
 
-uint8_t *Virtual_Com_Port_GetLineCoding(uint16_t Length);
-uint8_t *Virtual_Com_Port_SetLineCoding(uint16_t Length);
 
-#endif /* __usb_prop_H */
+
+#endif /* __USB_PROP_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-

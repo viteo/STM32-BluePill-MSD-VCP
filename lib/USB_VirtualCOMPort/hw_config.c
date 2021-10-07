@@ -36,20 +36,20 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-
 #include "usb_lib.h"
 #include "usb_prop.h"
 #include "usb_desc.h"
 #include "hw_config.h"
 #include "usb_pwr.h"
 #include "generic.h"
+#include "mass_mal.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+
 ErrorStatus HSEStartUpStatus;
-EXTI_InitTypeDef EXTI_InitStructure;
 extern __IO uint32_t packet_sent;
 extern __IO uint8_t Send_Buffer[VIRTUAL_COM_PORT_DATA_SIZE] ;
 extern __IO  uint32_t packet_receive;
@@ -57,13 +57,22 @@ extern __IO uint8_t Receive_length;
 
 uint8_t Receive_Buffer[64];
 uint32_t Send_length;
-static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len);
 /* Extern variables ----------------------------------------------------------*/
-
 extern LINE_CODING linecoding;
-
 /* Private function prototypes -----------------------------------------------*/
+static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len);
 /* Private functions ---------------------------------------------------------*/
+
+/*******************************************************************************
+* Function Name  : MAL_Config
+* Description    : MAL_layer configuration
+* Input          : None.
+* Return         : None.
+*******************************************************************************/
+void MAL_Config(void)
+{
+  MAL_Init(0);
+}
 /*******************************************************************************
 * Function Name  : Set_System
 * Description    : Configures Main system clocks & power
@@ -86,13 +95,16 @@ void Set_System(void)
   /* Enable all GPIOs Clock*/
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+  
+  /* MAL configuration */
+  MAL_Config();
 
 #ifdef USB_LOW_PWR_MGMT_SUPPORT
-  
+
   /**********************************************************************/
   /*  Configure the EXTI line 18 connected internally to the USB IP     */
   /**********************************************************************/
-  
+
   EXTI_ClearITPendingBit(EXTI_Line18);
   EXTI_InitStructure.EXTI_Line = EXTI_Line18;
   EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
@@ -138,18 +150,18 @@ void Enter_LowPowerMode(void)
 void Leave_LowPowerMode(void)
 {
   DEVICE_INFO *pInfo = &Device_Info;
-
+  
   /* Set the device state to the correct state */
   if (pInfo->Current_Configuration != 0)
   {
     /* Device configured */
     bDeviceState = CONFIGURED;
   }
-  else
+  else 
   {
     bDeviceState = ATTACHED;
   }
-    /*Enable SystemCoreClock*/
+  /*Enable SystemCoreClock*/
   SystemInit();
 }
 
@@ -161,13 +173,19 @@ void Leave_LowPowerMode(void)
 *******************************************************************************/
 void USB_Interrupts_Config(FunctionalState state)
 {
-NVIC_InitTypeDef NVIC_InitStructure;
-
+  NVIC_InitTypeDef NVIC_InitStructure; 
+  
   /* 2 bit for pre-emption priority, 2 bits for subpriority */
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
- 
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  
+  
   /* Enable the USB interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = state;
+  NVIC_Init(&NVIC_InitStructure);
+
+  NVIC_InitStructure.NVIC_IRQChannel = USB_HP_CAN1_TX_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = state;
@@ -176,16 +194,14 @@ NVIC_InitTypeDef NVIC_InitStructure;
   /* Enable the USB Wake-up interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = USBWakeUp_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = state;
-  NVIC_Init(&NVIC_InitStructure);   
+  NVIC_Init(&NVIC_InitStructure);
 }
-
 
 /*******************************************************************************
 * Function Name  : USB_Cable_Config
 * Description    : Software Connection/Disconnection of USB Cable
-* Input          : None.
-* Return         : Status
+* Input          : ENABLE means software replug
+* Return         : None
 *******************************************************************************/
 void USB_Cable_Config (FunctionalState NewState)
 {
@@ -205,7 +221,6 @@ void USB_Cable_Config (FunctionalState NewState)
   }
 }
 
-
 /*******************************************************************************
 * Function Name  : Get_SerialNum.
 * Description    : Create the serial number string descriptor.
@@ -216,17 +231,17 @@ void USB_Cable_Config (FunctionalState NewState)
 void Get_SerialNum(void)
 {
   uint32_t Device_Serial0, Device_Serial1, Device_Serial2;
-
+  
   Device_Serial0 = *(uint32_t*)ID1;
   Device_Serial1 = *(uint32_t*)ID2;
-  Device_Serial2 = *(uint32_t*)ID3;
- 
+  Device_Serial2 = *(uint32_t*)ID3; 
+  
   Device_Serial0 += Device_Serial2;
-
+  
   if (Device_Serial0 != 0)
   {
-    IntToUnicode (Device_Serial0, &Virtual_Com_Port_StringSerial[2] , 8);
-    IntToUnicode (Device_Serial1, &Virtual_Com_Port_StringSerial[18], 4);
+    IntToUnicode (Device_Serial0, &Composite_StringSerial[2] , 8);
+    IntToUnicode (Device_Serial1, &Composite_StringSerial[18], 4);
   }
 }
 
@@ -273,9 +288,9 @@ uint32_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t Send_length)
     /*Sent flag*/
     packet_sent = 0;
     /* send  packet to PMA*/
-    UserToPMABufferCopy((unsigned char*)ptrBuffer, ENDP1_TXADDR, Send_length);
-    SetEPTxCount(ENDP1, Send_length);
-    SetEPTxValid(ENDP1);
+    UserToPMABufferCopy((unsigned char*)ptrBuffer, ENDP3_TXADDR, Send_length);
+    SetEPTxCount(CDC_EP_IDX, Send_length);
+    SetEPTxValid(CDC_EP_IDX);
   }
   else
   {
@@ -295,7 +310,7 @@ uint32_t CDC_Receive_DATA(void)
 { 
   /*Receive flag*/
   packet_receive = 0;
-  SetEPRxValid(ENDP3); 
+  SetEPRxValid(CDC_EP_IDX);
   return 1 ;
 }
 

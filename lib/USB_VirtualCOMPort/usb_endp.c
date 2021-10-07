@@ -37,18 +37,14 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include "usb_lib.h"
-#include "usb_desc.h"
-#include "usb_mem.h"
+
 #include "hw_config.h"
+#include "usb_lib.h"
 #include "usb_istr.h"
-#include "usb_pwr.h"
+#include "usb_bot.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-
-/* Interval between sending IN packets in frame number (1 frame = 1ms) */
-#define VCOMPORT_IN_FRAME_INTERVAL             5
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 extern __IO uint32_t packet_sent;
@@ -57,32 +53,54 @@ extern __IO uint8_t Receive_Buffer[64];
 uint32_t Receive_length;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-
 /*******************************************************************************
-* Function Name  : EP1_IN_Callback
-* Description    :
+* Function Name  : EP1_OUT_Callback.
+* Description    : EP1 OUT Callback Routine.
 * Input          : None.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
-
-void EP1_IN_Callback (void)
+void EP1_OUT_Callback(void)
 {
-  packet_sent = 1;
+	Mass_Storage_Out();
 }
 
 /*******************************************************************************
-* Function Name  : EP3_OUT_Callback
-* Description    :
+* Function Name  : EP1_IN_Callback.
+* Description    : EP1 IN Callback Routine.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void EP1_IN_Callback(void)
+{
+	Mass_Storage_In();
+}
+
+/*******************************************************************************
+* Function Name  : EP2_IN_Callback
+* Description    : EP2 IN Callback Routine
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void EP2_IN_Callback(void)
+{
+	packet_sent = 1;
+}
+
+/*******************************************************************************
+* Function Name  : EP2_OUT_Callback.
+* Description    : EP2 OUT Callback Routine.
 * Input          : None.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
 void EP3_OUT_Callback(void)
 {
-  packet_receive = 1;
-  Receive_length = GetEPRxCount(ENDP3);
-  PMAToUserBufferCopy((unsigned char*)Receive_Buffer, ENDP3_RXADDR, Receive_length);
+	packet_receive = 1;
+	Receive_length = GetEPRxCount(CDC_EP_IDX);
+	PMAToUserBufferCopy((unsigned char*) Receive_Buffer, ENDP3_RXADDR, Receive_length);
 }
-
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
