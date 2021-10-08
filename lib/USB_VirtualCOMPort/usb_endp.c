@@ -90,6 +90,18 @@ void EP2_IN_Callback(void)
 }
 
 /*******************************************************************************
+* Function Name  : EP3_IN_Callback
+* Description    : EP3 IN Callback Routine
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void EP3_IN_Callback(void)
+{
+	packet_sent = 1;
+}
+
+/*******************************************************************************
 * Function Name  : EP2_OUT_Callback.
 * Description    : EP2 OUT Callback Routine.
 * Input          : None.

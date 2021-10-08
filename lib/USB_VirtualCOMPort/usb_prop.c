@@ -282,18 +282,20 @@ RESULT Composite_Data_Setup(uint8_t RequestNo)
 	uint8_t* (*CopyRoutine)(uint16_t);
 	CopyRoutine = NULL;
 
-	if (pInformation->USBwIndex != 0)
-		/*(pInformation->USBwValue != 0) && (pInformation->USBwIndex != 0) && (pInformation->USBwLength != 0x01)*/
-		return USB_UNSUPPORT;
-
-// todo alternate setup
-//	if(((pInformation->USBbmRequestType & RECIPIENT) == INTERFACE_RECIPIENT && pInformation->USBwIndex == MSC_INTERFACE_IDX) ||
-//			((pInformation->USBbmRequestType & RECIPIENT) == ENDPOINT_RECIPIENT && ((pInformation->USBwIndex & 0x7F) == MSC_EP_IDX)))
-//	{ return USBD_MSC_Setup(pdev, req);}
-//  return USBD_CDC_Setup(pdev, req);
-
-	if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT)))
-	{
+	if(((pInformation->USBbmRequestType & RECIPIENT) == INTERFACE_RECIPIENT && pInformation->USBwIndex == MSC_INTERFACE_IDX) ||
+			((pInformation->USBbmRequestType & RECIPIENT) == ENDPOINT_RECIPIENT && ((pInformation->USBwIndex & 0x7F) == MSC_EP_IDX)))
+	{ //handle MSC setup
+		switch(RequestNo)
+		{
+		case GET_MAX_LUN:
+		    CopyRoutine = MSD_Get_Max_Lun;
+		    break;
+		default:
+			return USB_UNSUPPORT;
+		}
+	}
+	else
+	{ //handle CDC setup
 		switch(RequestNo)
 		{
 		case GET_LINE_CODING:
@@ -303,9 +305,6 @@ RESULT Composite_Data_Setup(uint8_t RequestNo)
 			CopyRoutine = VCP_SetLineCoding;
 			Request = SET_LINE_CODING;
 			break;
-		case GET_MAX_LUN:
-		    CopyRoutine = MSD_Get_Max_Lun;
-		    break;
 		default:
 			return USB_UNSUPPORT;
 		}

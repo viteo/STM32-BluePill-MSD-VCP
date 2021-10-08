@@ -105,7 +105,7 @@
 /* associated to defined endpoints */
 /* #define  EP1_IN_Callback   NOP_Process */
 //#define  EP2_IN_Callback   NOP_Process
-#define  EP3_IN_Callback   NOP_Process
+//#define  EP3_IN_Callback   NOP_Process
 #define  EP4_IN_Callback   NOP_Process
 #define  EP5_IN_Callback   NOP_Process
 #define  EP6_IN_Callback   NOP_Process
