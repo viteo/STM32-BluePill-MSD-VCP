@@ -49,6 +49,8 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
+
+
 ErrorStatus HSEStartUpStatus;
 extern __IO uint32_t packet_sent;
 extern __IO uint8_t Send_Buffer[VIRTUAL_COM_PORT_DATA_SIZE] ;
@@ -271,47 +273,6 @@ static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len)
     
     pbuf[ 2* idx + 1] = 0;
   }
-}
-
-/*******************************************************************************
-* Function Name  : Send DATA .
-* Description    : send the data received from the STM32 to the PC through USB  
-* Input          : None.
-* Output         : None.
-* Return         : None.
-*******************************************************************************/
-uint32_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t Send_length)
-{
-  /*if max buffer is Not reached*/
-  if(Send_length < VIRTUAL_COM_PORT_DATA_SIZE)     
-  {
-    /*Sent flag*/
-    packet_sent = 0;
-    /* send  packet to PMA*/
-    UserToPMABufferCopy((unsigned char*)ptrBuffer, ENDP3_TXADDR, Send_length);
-    SetEPTxCount(CDC_EP_IDX, Send_length);
-    SetEPTxValid(CDC_EP_IDX);
-  }
-  else
-  {
-    return 0;
-  } 
-  return 1;
-}
-
-/*******************************************************************************
-* Function Name  : Receive DATA .
-* Description    : receive the data from the PC to STM32 and send it through USB
-* Input          : None.
-* Output         : None.
-* Return         : None.
-*******************************************************************************/
-uint32_t CDC_Receive_DATA(void)
-{ 
-  /*Receive flag*/
-  packet_receive = 0;
-  SetEPRxValid(CDC_EP_IDX);
-  return 1 ;
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

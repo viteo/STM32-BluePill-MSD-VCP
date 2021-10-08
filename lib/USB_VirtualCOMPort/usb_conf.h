@@ -101,6 +101,15 @@
 #define IMR_MSK (CNTR_CTRM  | CNTR_WKUPM | CNTR_SUSPM | CNTR_ERRM  | CNTR_SOFM \
                  | CNTR_ESOFM | CNTR_RESETM )
 
+/*#define CTR_CALLBACK*/
+/*#define DOVR_CALLBACK*/
+/*#define ERR_CALLBACK*/
+/*#define WKUP_CALLBACK*/
+/*#define SUSP_CALLBACK*/
+/*#define RESET_CALLBACK*/
+#define SOF_CALLBACK
+/*#define ESOF_CALLBACK*/
+
 /* CTR service routines */
 /* associated to defined endpoints */
 /* #define  EP1_IN_Callback   NOP_Process */
