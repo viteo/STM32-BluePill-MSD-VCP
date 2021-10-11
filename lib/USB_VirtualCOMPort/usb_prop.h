@@ -94,8 +94,6 @@ uint8_t *Composite_GetConfigDescriptor(uint16_t);
 uint8_t *Composite_GetStringDescriptor(uint16_t);
 void Composite_ClearFeature(void);
 
-
-
 #endif /* __USB_PROP_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -36,7 +36,7 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include <string.h>
+#include "virtualComPort.h"
 #include "usb_lib.h"
 #include "usb_prop.h"
 #include "usb_desc.h"
@@ -52,9 +52,6 @@ uint32_t VCP_Tx_ptr_in = 0;
 uint32_t VCP_Tx_ptr_out = 0;
 uint32_t VCP_Tx_length  = 0;
 uint8_t  USB_Tx_State = 0;
-
-/* Extern variables ----------------------------------------------------------*/
-extern LINE_CODING linecoding;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/

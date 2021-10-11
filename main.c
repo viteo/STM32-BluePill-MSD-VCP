@@ -9,34 +9,7 @@
 #include "usb_init.h"
 #include "usb_pwr.h"
 
-#include "term-srv.h"
-#include "string.h"
-
-void send_data(const char *data, int16_t size)
-{
-	while (size--)
-	{
-		VCP_AddToTxBuff(*data++);
-	}
-}
-
-void test_cmd1(const char* data) {
-    send_data(data, strlen(data));
-}
-void test_cmd2(const char* data) {
-    send_data("command executed", strlen("command executed"));
-}
-void toggle_cmd(const char* data)
-{
-	send_data("LED switched", strlen("LED switched"));
-	GPIO_ToggleBits(GPIOC, PIN_LED);
-}
-
-term_srv_cmd_t cmd_list[] = {
-    { .cmd = "test-arg", .len = 8, .handler = test_cmd1 },
-    { .cmd = "command", .len = 7, .handler = test_cmd2 },
-    { .cmd = "toggle", .len = 6, .handler = toggle_cmd },
-};
+#include "terminal.h"
 
 int main()
 {
@@ -54,7 +27,7 @@ int main()
 	DWT_Delay_Init();
 	USB_Interrupts_Config(ENABLE);
 
-	term_srv_init(send_data, cmd_list, 3);
+	term_srv_init(term_send_data, cmd_list, cmd_count);
 
 	USB_Init();
 

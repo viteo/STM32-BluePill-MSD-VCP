@@ -44,6 +44,7 @@
 #include "usb_bot.h"
 #include "usb_desc.h"
 #include "usb_pwr.h"
+#include "virtualComPort.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -53,7 +54,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint8_t VCP_Rx_Buffer[VIRTUAL_COM_PORT_DATA_SIZE];
+uint8_t CDC_Rx_Buffer[VIRTUAL_COM_PORT_DATA_SIZE];
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 /*******************************************************************************
@@ -116,12 +117,12 @@ void EP3_OUT_Callback(void)
     uint16_t USB_Rx_Cnt;
 
   /* Get the received data buffer and update the counter */
-  USB_Rx_Cnt = USB_SIL_Read(CDC_OUT_EP, VCP_Rx_Buffer);
+  USB_Rx_Cnt = USB_SIL_Read(CDC_OUT_EP, CDC_Rx_Buffer);
 
   /* USB data will be immediately processed, this allow next USB traffic being
   NAKed till the end of the USART Xfer */
 
-  VCP_ProcessRxBuff(VCP_Rx_Buffer, USB_Rx_Cnt);
+  VCP_ProcessRxBuff(CDC_Rx_Buffer, USB_Rx_Cnt);
 
   /* Enable the receive of data on EP3 */
   SetEPRxValid(CDC_EP_IDX);

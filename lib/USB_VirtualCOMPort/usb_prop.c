@@ -127,9 +127,9 @@ extern Bulk_Only_CBW CBW;
 /* Private function prototypes -----------------------------------------------*/
 /* Extern function prototypes ------------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-uint8_t *VCP_GetLineCoding(uint16_t Length);
-uint8_t *VCP_SetLineCoding(uint16_t Length);
-uint8_t *MSD_Get_Max_Lun(uint16_t Length);
+uint8_t *CDC_GetLineCoding(uint16_t Length);
+uint8_t *CDC_SetLineCoding(uint16_t Length);
+uint8_t *MSC_Get_Max_Lun(uint16_t Length);
 
 /*******************************************************************************
  * Function Name  : Composite_Init
@@ -288,7 +288,7 @@ RESULT Composite_Data_Setup(uint8_t RequestNo)
 		switch(RequestNo)
 		{
 		case GET_MAX_LUN:
-		    CopyRoutine = MSD_Get_Max_Lun;
+		    CopyRoutine = MSC_Get_Max_Lun;
 		    break;
 		default:
 			return USB_UNSUPPORT;
@@ -299,10 +299,10 @@ RESULT Composite_Data_Setup(uint8_t RequestNo)
 		switch(RequestNo)
 		{
 		case GET_LINE_CODING:
-			CopyRoutine = VCP_GetLineCoding;
+			CopyRoutine = CDC_GetLineCoding;
 			break;
 		case SET_LINE_CODING:
-			CopyRoutine = VCP_SetLineCoding;
+			CopyRoutine = CDC_SetLineCoding;
 			Request = SET_LINE_CODING;
 			break;
 		default:
@@ -433,13 +433,13 @@ void Composite_ClearFeature(void)
 }
 
 /*******************************************************************************
-* Function Name  : VCP_GetLineCoding.
+* Function Name  : CDC_GetLineCoding.
 * Description    : send the linecoding structure to the PC host.
 * Input          : Length.
 * Output         : None.
 * Return         : Linecoding structure base address.
 *******************************************************************************/
-uint8_t *VCP_GetLineCoding(uint16_t Length)
+uint8_t *CDC_GetLineCoding(uint16_t Length)
 {
   if (Length == 0)
   {
@@ -450,13 +450,13 @@ uint8_t *VCP_GetLineCoding(uint16_t Length)
 }
 
 /*******************************************************************************
-* Function Name  : VCP_SetLineCoding.
+* Function Name  : CDC_SetLineCoding.
 * Description    : Set the linecoding structure fields.
 * Input          : Length.
 * Output         : None.
 * Return         : Linecoding structure base address.
 *******************************************************************************/
-uint8_t *VCP_SetLineCoding(uint16_t Length)
+uint8_t *CDC_SetLineCoding(uint16_t Length)
 {
   if (Length == 0)
   {
@@ -467,13 +467,13 @@ uint8_t *VCP_SetLineCoding(uint16_t Length)
 }
 
 /*******************************************************************************
-* Function Name  : MSD_Get_Max_Lun
+* Function Name  : MSC_Get_Max_Lun
 * Description    : Handle the Get Max Lun request.
 * Input          : uint16_t Length.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
-uint8_t *MSD_Get_Max_Lun(uint16_t Length)
+uint8_t *MSC_Get_Max_Lun(uint16_t Length)
 {
   if (Length == 0)
   {
